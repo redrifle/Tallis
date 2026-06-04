@@ -1,0 +1,4 @@
+#ifndef VERSION_HPP_019e306a_4c8a_7dac_904c_6f3221fbfc62
+#define VERSION_HPP_019e306a_4c8a_7dac_904c_6f3221fbfc62
+void print_version(void);
+#endif /* VERSION_HPP_019e306a_4c8a_7dac_904c_6f3221fbfc62 */
