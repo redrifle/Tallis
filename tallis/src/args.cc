@@ -6,7 +6,7 @@
 #include <config.h>
 #include "args.hpp"
 
-int tallis_args_parse(int argc, char** argv, tallis_args_struct& args)
+int tallis_args_parse(int argc, char** argv, tallis_args& args)
 {
 	try
 	{

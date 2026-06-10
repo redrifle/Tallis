@@ -5,7 +5,8 @@ add_library(libtallis
     src/lt_engine.cc
     src/lt_callback.cc
     src/lt_input.cc
-    src/lt_device.cc)
+    src/lt_device.cc
+    src/lt_cleanup.cc)
 
 target_include_directories(libtallis
     PUBLIC
@@ -15,7 +16,7 @@ target_include_directories(libtallis
 
 find_package(Vulkan REQUIRED)
 target_include_directories(libtallis PRIVATE Vulkan::Headers)
-target_link_libraries(libtallis PRIVATE Vulkan::Vulkan)
+target_link_libraries(libtallis PUBLIC Vulkan::Vulkan)
 
 include(FetchContent)
 FetchContent_Declare(

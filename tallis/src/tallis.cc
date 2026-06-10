@@ -10,9 +10,9 @@ int main(int argc, char** argv)
 	print_version();
 	try
 	{
-		tallis_args_struct tallis_args {};
-		tallis_args_parse(argc, argv, tallis_args);
-		lt_window window("Tallis", tallis_args.width, tallis_args.height);
+		tallis_args args {};
+		tallis_args_parse(argc, argv, args);
+		lt_window window("Tallis", args.width, args.height);
 		lt_run(window);
 	}
 	catch (std::exception& e)

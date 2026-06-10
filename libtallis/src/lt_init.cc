@@ -1,7 +1,9 @@
+#include <vulkan/vulkan.h>
+#include <libtallis/lt_engine.hpp>
 #include <libtallis/lt_instance.hpp>
 
-int lt_init()
+lt_data lt_init()
 {
-    lt_instance();
-    return 0;
+    lt_data data {.instance = lt_instance()};
+    return data;
 }
