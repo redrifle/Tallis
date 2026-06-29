@@ -10,8 +10,7 @@ int main(int argc, char** argv)
 	print_version();
 	try
 	{
-		tallis_args args {};
-		tallis_args_parse(argc, argv, args);
+		auto args {tallis_args_parse(argc, argv)};
 		lt_window window("Tallis", args.width, args.height);
 		lt_run(window);
 	}

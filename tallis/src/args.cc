@@ -6,8 +6,9 @@
 #include <config.h>
 #include "args.hpp"
 
-int tallis_args_parse(int argc, char** argv, tallis_args& args)
+tallis_args tallis_args_parse(int argc, char** argv)
 {
+	tallis_args args {};
 	try
 	{
 		std::string desc {std::format("{} {}", PROJECT_NAME, PROJECT_VER)};
@@ -29,8 +30,8 @@ int tallis_args_parse(int argc, char** argv, tallis_args& args)
 	catch (std::exception& e)
 	{
 		std::println(stderr, "{}", e.what());
-		return 1;
+		return {};
 	}
 
-	return 0;
+	return args;
 }

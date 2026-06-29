@@ -3,7 +3,7 @@
 
 void lt_toggle_cursor(lt_window* w)
 {
-	GLFWwindow* wp = w->get_pointer();
+	GLFWwindow* wp {w->win};
 	int mode {glfwGetInputMode(wp, GLFW_CURSOR)};
 
 	if (mode == GLFW_CURSOR_DISABLED)
@@ -16,5 +16,5 @@ void lt_toggle_cursor(lt_window* w)
 	}
 
 	glfwSetInputMode(wp, GLFW_CURSOR, mode);
-	glfwSetCursorPos(wp, w->get_width() / 2.0f, w->get_height() / 2.0f);
+	glfwSetCursorPos(wp, w->width / 2.0f, w->height / 2.0f);
 }
