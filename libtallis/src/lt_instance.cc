@@ -1,3 +1,4 @@
+#include <cstdint>
 #include <vulkan/vulkan.hpp>
 #include <GLFW/glfw3.h>
 
@@ -8,7 +9,7 @@ VkInstance lt_instance()
 		.pApplicationName = "Tallis",
 		.apiVersion = VK_API_VERSION_1_3};
 
-	uint32_t ext_count {0};
+	std::uint32_t ext_count {0};
 	char const* const* const exts {
 		glfwGetRequiredInstanceExtensions(&ext_count)};
 

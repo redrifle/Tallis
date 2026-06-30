@@ -5,6 +5,7 @@
 struct lt_data
 {
     VkInstance instance {nullptr};
+    VkPhysicalDevice physdev {nullptr};
 };
 
 int lt_run(lt_window&);
