@@ -4,16 +4,18 @@
 #include <libtallis/lt_window.hpp>
 #include <libtallis/lt_cleanup.hpp>
 
-int lt_run(lt_window& win)
+namespace lt = libtallis;
+
+int libtallis::run(lt::window& win)
 {
-	lt_data data {lt_init()};
+	lt::context context {lt::init()};
 
 	while (!win.should_close())
 	{
 		glfwWaitEvents();
 	}
 
-	lt_cleanup(data);
+	lt::cleanup(context);
 	glfwTerminate();
 	return 0;
 }

@@ -1,8 +1,9 @@
 #include <cstdint>
+#include <libtallis/lt_instance.hpp>
 #include <vulkan/vulkan.hpp>
 #include <GLFW/glfw3.h>
 
-VkInstance lt_instance()
+VkInstance libtallis::create_instance()
 {
 	const VkApplicationInfo app_info {
 		.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO,
@@ -25,7 +26,7 @@ VkInstance lt_instance()
 	if (rv != VK_SUCCESS)
 	{
 		throw std::runtime_error("Couldn't create vulkan instance.");
-        return nullptr;
+		return nullptr;
 	}
 
 	return instance;

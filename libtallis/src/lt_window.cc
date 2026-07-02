@@ -5,7 +5,7 @@
 #include <libtallis/lt_window.hpp>
 #include <libtallis/lt_callback.hpp>
 
-lt_window::lt_window(std::string n, unsigned int w, unsigned int h) :
+libtallis::window::window(std::string n, unsigned int w, unsigned int h) :
 	name(n),
 	width(w),
 	height(h)
@@ -33,12 +33,12 @@ lt_window::lt_window(std::string n, unsigned int w, unsigned int h) :
 	glfwSetWindowUserPointer(win, this);
 }
 
-bool lt_window::should_close()
+bool libtallis::window::should_close()
 {
 	return glfwWindowShouldClose(win);
 }
 
-GLFWwindow* lt_window::lt_create_win(const std::string_view name)
+GLFWwindow* libtallis::window::create_win(const std::string_view name)
 {
 	if (glfwInit() != GLFW_TRUE)
 	{
@@ -55,7 +55,7 @@ GLFWwindow* lt_window::lt_create_win(const std::string_view name)
 	return win;
 }
 
-lt_window::~lt_window()
+libtallis::window::~window()
 {
 	glfwDestroyWindow(win);
 }

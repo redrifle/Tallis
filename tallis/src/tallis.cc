@@ -11,12 +11,12 @@ int main(int argc, char** argv)
 	try
 	{
 		auto args {tallis_args_parse(argc, argv)};
-		lt_window window("Tallis", args.width, args.height);
-		lt_run(window);
+		libtallis::window window("Tallis", args.width, args.height);
+		libtallis::run(window);
 	}
-	catch (std::exception& e)
+	catch (const std::exception& e)
 	{
-		std::println(stderr, "{}", e.what());
+		std::println(stderr, "Exception: {}", e.what());
 		return EXIT_FAILURE;
 	}
 	return EXIT_SUCCESS;

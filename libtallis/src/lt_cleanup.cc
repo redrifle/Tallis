@@ -1,11 +1,14 @@
 #include <vulkan/vulkan.h>
+#include <libtallis/lt_cleanup.hpp>
 #include <libtallis/lt_engine.hpp>
 
-int lt_cleanup(lt_data& data)
+namespace lt = libtallis;
+
+int libtallis::cleanup(lt::context& c)
 {
-    if (data.instance)
-    {
-        vkDestroyInstance(data.instance, nullptr);
-    }
-    return 0;
+	if (c.instance)
+	{
+		vkDestroyInstance(c.instance, nullptr);
+	}
+	return 0;
 }

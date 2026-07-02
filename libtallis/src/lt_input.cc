@@ -1,7 +1,8 @@
 #include <GLFW/glfw3.h>
 #include <libtallis/lt_window.hpp>
+#include <libtallis/lt_input.hpp>
 
-void lt_toggle_cursor(lt_window* w)
+void libtallis::toggle_cursor(libtallis::window* w)
 {
 	GLFWwindow* wp {w->win};
 	int mode {glfwGetInputMode(wp, GLFW_CURSOR)};
