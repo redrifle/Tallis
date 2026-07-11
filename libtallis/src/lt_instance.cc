@@ -1,4 +1,5 @@
 #include <cstdint>
+#include <stdexcept>
 #include <libtallis/lt_instance.hpp>
 #include <vulkan/vulkan.hpp>
 #include <GLFW/glfw3.h>
@@ -26,7 +27,6 @@ VkInstance libtallis::create_instance()
 	if (rv != VK_SUCCESS)
 	{
 		throw std::runtime_error("Couldn't create vulkan instance.");
-		return nullptr;
 	}
 
 	return instance;

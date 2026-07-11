@@ -27,7 +27,7 @@ tallis_args tallis_args_parse(int argc, char** argv)
 			exit(app.exit(e));
 		}
 	}
-	catch (std::exception& e)
+	catch (const std::exception& e)
 	{
 		std::println(stderr, "{}", e.what());
 		return {};

@@ -6,7 +6,10 @@ add_library(libtallis
     src/lt_callback.cc
     src/lt_input.cc
     src/lt_device.cc
-    src/lt_cleanup.cc)
+    src/lt_cleanup.cc
+    src/lt_mem.cc
+    src/lt_surface.cc
+    src/lt_swapchain.cc)
 
 target_include_directories(libtallis
     PUBLIC
@@ -25,4 +28,12 @@ FetchContent_Declare(
     GIT_REPOSITORY "https://github.com/glfw/glfw")
 FetchContent_MakeAvailable(GLFW)
 target_link_libraries(libtallis PUBLIC glfw)
+
+FetchContent_Declare(
+    vma
+    SOURCE_DIR "${CMAKE_CURRENT_BINARY_DIR}/external/vma"
+    GIT_REPOSITORY "https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator")
+FetchContent_MakeAvailable(vma)
+target_link_libraries(libtallis PUBLIC GPUOpen::VulkanMemoryAllocator)
+
 target_include_directories(libtallis PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/external)

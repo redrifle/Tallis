@@ -6,9 +6,9 @@
 
 namespace lt = libtallis;
 
-int libtallis::run(lt::window& win)
+void libtallis::run(lt::window& win)
 {
-	lt::context context {lt::init()};
+	lt::context context {lt::init(win)};
 
 	while (!win.should_close())
 	{
@@ -16,6 +16,4 @@ int libtallis::run(lt::window& win)
 	}
 
 	lt::cleanup(context);
-	glfwTerminate();
-	return 0;
 }

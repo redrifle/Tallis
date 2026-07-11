@@ -12,7 +12,7 @@
 
 namespace lt = libtallis;
 
-VkPhysicalDevice libtallis::create_physical_device(VkInstance& instance)
+VkPhysicalDevice libtallis::create_physical_device(VkInstance instance)
 {
 	std::uint32_t dev_count {0};
 	int rv {vkEnumeratePhysicalDevices(instance, &dev_count, nullptr)};
@@ -48,11 +48,12 @@ VkPhysicalDevice libtallis::create_physical_device(VkInstance& instance)
 		for (std::uint32_t i {0}; i < dev_count; ++i)
 		{
 			vkGetPhysicalDeviceProperties2(devs[i], &props);
-			scores[i] += (props.properties.limits.maxPushConstantsSize +
-						  props.properties.limits.maxMemoryAllocationCount +
-						  props.properties.limits.maxImageDimension2D +
-						  props.properties.limits.maxSamplerAnisotropy) *
-						 0.1;
+			/* NOTE: Don't chain these additions
+			lest unsigned integer overflow be your end. */
+			scores[i] += props.properties.limits.maxPushConstantsSize;
+			scores[i] += props.properties.limits.maxMemoryAllocationCount;
+			scores[i] += props.properties.limits.maxImageDimension2D;
+			scores[i] += props.properties.limits.maxSamplerAnisotropy;
 		}
 		auto scores_it {std::max_element(scores.begin(), scores.end())};
 		dev_index = std::distance(scores.begin(), scores_it);
@@ -66,8 +67,8 @@ VkPhysicalDevice libtallis::create_physical_device(VkInstance& instance)
 	return physdev;
 }
 
-uint32_t libtallis::get_queue_family(VkInstance& instance,
-									 VkPhysicalDevice& physdev)
+uint32_t libtallis::get_queue_family(VkInstance instance,
+									 VkPhysicalDevice physdev)
 {
 	uint32_t queue_fam_count {0};
 	vkGetPhysicalDeviceQueueFamilyProperties(physdev,
@@ -102,8 +103,8 @@ uint32_t libtallis::get_queue_family(VkInstance& instance,
 	return 0;
 }
 
-lt::device libtallis::create_device(VkInstance& instance,
-									VkPhysicalDevice& physdev)
+lt::device libtallis::create_device(VkInstance instance,
+									VkPhysicalDevice physdev)
 {
 	lt::device device {};
 
