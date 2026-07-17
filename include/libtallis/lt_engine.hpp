@@ -9,7 +9,6 @@ namespace libtallis
 	struct context
 	{
 		VkInstance instance;
-		VkPhysicalDevice physdev;
 		libtallis::device dev;
 		libtallis::swapchain swapchain;
 	};

@@ -15,5 +15,5 @@ void libtallis::run(lt::window& win)
 		glfwWaitEvents();
 	}
 
-	lt::cleanup(context);
+	lt::cleanup(context, win);
 }

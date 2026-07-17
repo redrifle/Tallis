@@ -3,6 +3,6 @@
 #include <libtallis/lt_engine.hpp>
 namespace libtallis
 {
-	void cleanup(libtallis::context&);
+	void cleanup(libtallis::context&, libtallis::window&);
 } /* namespace libtallis */
 #endif /* LT_CLEANUP_HPP_019eb055_001d_74e2_bffb_8adf58066306 */
