@@ -2,6 +2,7 @@
 #include <climits>
 #include <stdexcept>
 #include <string>
+#include <vulkan/vulkan.h>
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 #include <libtallis/lt_window.hpp>
@@ -47,6 +48,16 @@ libtallis::window::window(std::string n, unsigned int w, unsigned int h) :
 	glfwSetWindowUserPointer(win, this);
 
 	++num_windows;
+}
+
+void libtallis::window::create_surface(VkInstance inst)
+{
+	VkResult rv {glfwCreateWindowSurface(inst, win, nullptr, &surface)};
+
+	if (rv != VK_SUCCESS)
+	{
+		throw std::runtime_error("Couldn't create window surface");
+	}
 }
 
 bool libtallis::window::should_close()

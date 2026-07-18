@@ -9,9 +9,7 @@
 
 namespace lt = libtallis;
 
-lt::swapchain libtallis::create_swapchain(VkPhysicalDevice physdev,
-										  VkDevice dev,
-										  VkSurfaceKHR surface)
+void lt::swapchain::create_swapchain(lt::device& dev, VkSurfaceKHR surface)
 {
 	VkSurfaceCapabilities2KHR surface_caps {
 		.sType = VK_STRUCTURE_TYPE_SURFACE_CAPABILITIES_2_KHR};
@@ -19,7 +17,7 @@ lt::swapchain libtallis::create_swapchain(VkPhysicalDevice physdev,
 		.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SURFACE_INFO_2_KHR,
 		.surface = surface};
 
-	VkResult rv {vkGetPhysicalDeviceSurfaceCapabilities2KHR(physdev,
+	VkResult rv {vkGetPhysicalDeviceSurfaceCapabilities2KHR(dev.physdev,
 															&surface_info,
 															&surface_caps)};
 
@@ -28,20 +26,20 @@ lt::swapchain libtallis::create_swapchain(VkPhysicalDevice physdev,
 		throw std::runtime_error("Couldn't get surface capabilities");
 	}
 
-	lt::swapchain swapchain {.img_count = 3};
-	swapchain.extent = surface_caps.surfaceCapabilities.currentExtent;
+	img_count = 3;
+	extent = surface_caps.surfaceCapabilities.currentExtent;
 
 	if (surface_caps.surfaceCapabilities.currentExtent.width == 0xFFFFFFFF)
 	{
 		std::print("Wayland detected. Developer, please check swapchain code "
 				   "if this does not work :P\n");
-		swapchain.extent = {
+		extent = {
 			.width = surface_caps.surfaceCapabilities.maxImageExtent.width,
 			.height = surface_caps.surfaceCapabilities.maxImageExtent.height};
 	}
 
 	uint32_t fmt_count {0};
-	rv = vkGetPhysicalDeviceSurfaceFormats2KHR(physdev,
+	rv = vkGetPhysicalDeviceSurfaceFormats2KHR(dev.physdev,
 											   &surface_info,
 											   &fmt_count,
 											   nullptr);
@@ -55,7 +53,7 @@ lt::swapchain libtallis::create_swapchain(VkPhysicalDevice physdev,
 		fmt_count,
 		VkSurfaceFormat2KHR {.sType = VK_STRUCTURE_TYPE_SURFACE_FORMAT_2_KHR});
 
-	rv = vkGetPhysicalDeviceSurfaceFormats2KHR(physdev,
+	rv = vkGetPhysicalDeviceSurfaceFormats2KHR(dev.physdev,
 											   &surface_info,
 											   &fmt_count,
 											   surface_formats.data());
@@ -84,23 +82,22 @@ lt::swapchain libtallis::create_swapchain(VkPhysicalDevice physdev,
 		.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
 		.surface = surface,
 		.minImageCount = std::clamp(
-			swapchain.img_count,
+			img_count,
 			surface_caps.surfaceCapabilities.minImageCount,
 			surface_caps.surfaceCapabilities.maxImageCount),
 		.imageFormat = image_format,
 		.imageColorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR,
-		.imageExtent = {.width = swapchain.extent.width,
-						.height = swapchain.extent.height},
+		.imageExtent = {.width = extent.width, .height = extent.height},
 		.imageArrayLayers = 1,
 		.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
 		.preTransform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR,
 		.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR,
 		.presentMode = VK_PRESENT_MODE_FIFO_KHR};
 
-	rv = vkCreateSwapchainKHR(dev,
+	rv = vkCreateSwapchainKHR(dev.vkdev,
 							  &swapchain_info,
 							  nullptr,
-							  &swapchain.vkswapchain);
+							  &vkswapchain);
 
 	if (rv != VK_SUCCESS)
 	{
@@ -108,8 +105,8 @@ lt::swapchain libtallis::create_swapchain(VkPhysicalDevice physdev,
 	}
 
 	uint32_t image_count {0};
-	rv = vkGetSwapchainImagesKHR(dev,
-								 swapchain.vkswapchain,
+	rv = vkGetSwapchainImagesKHR(dev.vkdev,
+								 vkswapchain,
 								 &image_count,
 								 nullptr);
 
@@ -118,22 +115,23 @@ lt::swapchain libtallis::create_swapchain(VkPhysicalDevice physdev,
 		throw std::runtime_error("Couldn't get swapchain image count");
 	}
 
-	swapchain.images.resize(image_count);
-	rv = vkGetSwapchainImagesKHR(dev,
-								 swapchain.vkswapchain,
+	std::print("IMAGE COUNT: {}\n", image_count);
+
+	images.resize(image_count);
+	rv = vkGetSwapchainImagesKHR(dev.vkdev,
+								 vkswapchain,
 								 &image_count,
-								 swapchain.images.data());
+								 images.data());
 
 	if (rv != VK_SUCCESS)
 	{
 		throw std::runtime_error("Couldn't get swapchain images");
 	}
 
-	return swapchain;
+	depth_image = create_depth_image(dev);
 }
 
-lt::image libtallis::create_depth_image(lt::device& dev,
-										lt::swapchain& swapchain)
+lt::image lt::swapchain::create_depth_image(lt::device& dev)
 {
 	VkFormat depth_format {VK_FORMAT_UNDEFINED};
 	std::array depth_formats {VK_FORMAT_D24_UNORM_S8_UINT,
@@ -160,9 +158,7 @@ lt::image libtallis::create_depth_image(lt::device& dev,
 		.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
 		.imageType = VK_IMAGE_TYPE_2D,
 		.format = depth_format,
-		.extent = {.width = swapchain.extent.width,
-				   .height = swapchain.extent.height,
-				   .depth = 1},
+		.extent = {.width = extent.width, .height = extent.height, .depth = 1},
 		.mipLevels = 1,
 		.arrayLayers = 1,
 		.samples = VK_SAMPLE_COUNT_1_BIT,

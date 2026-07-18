@@ -18,17 +18,22 @@ namespace libtallis
 	};
 	struct device
 	{
+		unsigned int device_index;
 		VkPhysicalDevice physdev;
-		VkDevice vkdev;
 		uint32_t q_family_index;
 		VkQueue queue;
+		VkDevice vkdev;
 		VkPhysicalDeviceProperties2 props;
 		VmaAllocator allocator;
 		struct device_features features;
 		std::vector<const char*> extensions;
-		VkPhysicalDevice create_physical_device(VkInstance);
+		device();
+		device(VkInstance, VkPhysicalDevice);
+		VkDevice create_logical_device(VkInstance);
+		uint32_t select_queue_family(VkInstance);
+		VmaAllocator create_allocator(VkInstance);
 	};
-	uint32_t get_queue_family(VkInstance, VkPhysicalDevice);
-	VkDevice create_device(VkInstance, device&);
+	std::vector<VkPhysicalDevice> get_device_list(VkInstance);
+	unsigned int get_best_device_index(std::vector<VkPhysicalDevice>&);
 } /* namespace libtallis */
 #endif /* LT_DEVICE_HPP_019e8124_ddc9_7c7d_a047_cffc6f33fa95 */

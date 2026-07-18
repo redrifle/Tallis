@@ -14,6 +14,7 @@ namespace libtallis
 		VkSurfaceKHR surface;
 		window(std::string, unsigned int = 640, unsigned int = 480);
 		~window();
+		void create_surface(VkInstance);
 		bool should_close();
 
 	  private:

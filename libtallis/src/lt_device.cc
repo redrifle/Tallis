@@ -12,65 +12,34 @@
 
 namespace lt = libtallis;
 
-VkPhysicalDevice libtallis::device::create_physical_device(VkInstance instance)
+libtallis::device::device() :
+	device_index(0),
+	physdev(nullptr),
+	vkdev(nullptr),
+	q_family_index(0),
+	queue(nullptr),
+	props({}),
+	allocator(nullptr),
+	features({}),
+	extensions({})
 {
-	std::uint32_t dev_count {0};
-	int rv {vkEnumeratePhysicalDevices(instance, &dev_count, nullptr)};
-
-	if (rv != VK_SUCCESS)
-	{
-		throw std::runtime_error("Couldn't enumerate devices");
-	}
-
-	if (dev_count == 0)
-	{
-		throw std::runtime_error("No physical devices found");
-	}
-
-	std::vector<VkPhysicalDevice> devs(dev_count);
-	rv = vkEnumeratePhysicalDevices(instance, &dev_count, devs.data());
-
-	if (rv != VK_SUCCESS)
-	{
-		throw std::runtime_error("Couldn't obtain device list");
-	}
-
-	device::props.sType = {VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2};
-	VkPhysicalDeviceProperties2 props_tmp {
-		.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2};
-	std::uint32_t dev_index {0};
-	if (dev_count == 1)
-	{
-		vkGetPhysicalDeviceProperties2(devs[dev_index], &props_tmp);
-	}
-	else if (dev_count > 1)
-	{
-		std::vector<double> scores(dev_count);
-		for (std::uint32_t i {0}; i < dev_count; ++i)
-		{
-			vkGetPhysicalDeviceProperties2(devs[i], &props);
-			/* NOTE: Don't chain these additions
-			lest unsigned integer overflow be your end. */
-			scores[i] += props_tmp.properties.limits.maxPushConstantsSize;
-			scores[i] += props_tmp.properties.limits.maxMemoryAllocationCount;
-			scores[i] += props_tmp.properties.limits.maxImageDimension2D;
-			scores[i] += props_tmp.properties.limits.maxSamplerAnisotropy;
-		}
-		auto scores_it {std::max_element(scores.begin(), scores.end())};
-		dev_index = std::distance(scores.begin(), scores_it);
-	}
-	VkPhysicalDevice physdev {devs[dev_index]};
-	vkGetPhysicalDeviceProperties2(physdev, &(device::props));
-	std::print("Using device #{} : {}\nVendor ID: 0x{:X}\n",
-			   dev_index,
-			   device::props.properties.deviceName,
-			   props.properties.vendorID);
-
-	return physdev;
 }
 
-uint32_t libtallis::get_queue_family(VkInstance instance,
-									 VkPhysicalDevice physdev)
+libtallis::device::device(VkInstance instance, VkPhysicalDevice dev) : device()
+{
+	physdev = dev;
+	props.sType = {VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2};
+	vkGetPhysicalDeviceProperties2(physdev, &props);
+	q_family_index = select_queue_family(instance);
+	vkdev = create_logical_device(instance);
+	allocator = create_allocator(instance);
+
+	std::print("Using device : {}\nVendor ID : 0x{:X}\n",
+			   props.properties.deviceName,
+			   props.properties.vendorID);
+}
+
+uint32_t libtallis::device::select_queue_family(VkInstance instance)
 {
 	uint32_t queue_fam_count {0};
 	vkGetPhysicalDeviceQueueFamilyProperties(physdev,
@@ -96,7 +65,6 @@ uint32_t libtallis::get_queue_family(VkInstance instance,
 	{
 		if (queue_fam.queueFlags & VK_QUEUE_GRAPHICS_BIT)
 		{
-			std::print("Found queue family with graphics on #{}\n", i);
 			return i;
 		}
 	}
@@ -105,12 +73,11 @@ uint32_t libtallis::get_queue_family(VkInstance instance,
 	return 0;
 }
 
-VkDevice libtallis::create_device(VkInstance instance, lt::device& device)
+VkDevice lt::device::create_logical_device(VkInstance instance)
 {
-	device.q_family_index = get_queue_family(instance, device.physdev);
 	int rv = glfwGetPhysicalDevicePresentationSupport(instance,
-													  device.physdev,
-													  device.q_family_index);
+													  physdev,
+													  q_family_index);
 
 	if (rv != GLFW_TRUE)
 	{
@@ -120,7 +87,7 @@ VkDevice libtallis::create_device(VkInstance instance, lt::device& device)
 	const float qp {1.0f};
 	VkDeviceQueueCreateInfo queue_info {
 		.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
-		.queueFamilyIndex = device.q_family_index,
+		.queueFamilyIndex = q_family_index,
 		.queueCount = 1,
 		.pQueuePriorities = &qp};
 
@@ -144,8 +111,8 @@ VkDevice libtallis::create_device(VkInstance instance, lt::device& device)
 		.pNext = &supported_features.vk_13_features,
 		.features = supported_features.vk_10_features};
 
-	vkGetPhysicalDeviceFeatures2(device.physdev, &device_features);
-	device.features.enable_features(supported_features);
+	vkGetPhysicalDeviceFeatures2(physdev, &device_features);
+	features.enable_features(supported_features);
 
 	VkDeviceCreateInfo device_info {
 		.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
@@ -157,14 +124,14 @@ VkDevice libtallis::create_device(VkInstance instance, lt::device& device)
 		.pEnabledFeatures = nullptr};
 
 	VkDevice vkdev {};
-	rv = vkCreateDevice(device.physdev, &device_info, nullptr, &vkdev);
+	rv = vkCreateDevice(physdev, &device_info, nullptr, &vkdev);
 
 	if (rv != VK_SUCCESS)
 	{
 		throw std::runtime_error("Couldn't create logical device");
 	}
 
-	vkGetDeviceQueue(vkdev, device.q_family_index, 0, &device.queue);
+	vkGetDeviceQueue(vkdev, q_family_index, 0, &queue);
 	return vkdev;
 }
 
@@ -217,4 +184,85 @@ void libtallis::device_features::enable_features(
 
 	vk_13_features.dynamicRendering = supported_features.vk_13_features
 										  .dynamicRendering;
+}
+
+std::vector<VkPhysicalDevice> lt::get_device_list(VkInstance inst)
+{
+	std::uint32_t dev_count {0};
+	int rv {vkEnumeratePhysicalDevices(inst, &dev_count, nullptr)};
+
+	if (rv != VK_SUCCESS)
+	{
+		throw std::runtime_error("Couldn't enumerate devices");
+	}
+
+	if (dev_count == 0)
+	{
+		throw std::runtime_error("No physical devices found");
+	}
+
+	std::vector<VkPhysicalDevice> devs(dev_count);
+	rv = vkEnumeratePhysicalDevices(inst, &dev_count, devs.data());
+
+	if (rv != VK_SUCCESS)
+	{
+		throw std::runtime_error("Couldn't obtain device list");
+	}
+
+	return devs;
+}
+
+unsigned int libtallis::get_best_device_index(
+	std::vector<VkPhysicalDevice>& devs)
+{
+	VkPhysicalDeviceProperties2 props {
+		VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2};
+
+	std::uint32_t dev_index {0};
+	if (devs.size() == 1)
+	{
+		vkGetPhysicalDeviceProperties2(devs[dev_index], &props);
+	}
+	else if (devs.size() > 1)
+	{
+		std::vector<double> scores(devs.size());
+		for (std::uint32_t i {0}; i < devs.size(); ++i)
+		{
+			props.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2;
+			vkGetPhysicalDeviceProperties2(devs[i], &props);
+			/* NOTE: Don't chain these additions
+			lest unsigned integer overflow be your end. */
+			scores[i] += props.properties.limits.maxPushConstantsSize;
+			scores[i] += props.properties.limits.maxMemoryAllocationCount;
+			scores[i] += props.properties.limits.maxImageDimension2D;
+			scores[i] += props.properties.limits.maxSamplerAnisotropy;
+		}
+		auto scores_it {std::max_element(scores.begin(), scores.end())};
+		dev_index = std::distance(scores.begin(), scores_it);
+	}
+	return dev_index;
+}
+
+VmaAllocator lt::device::create_allocator(VkInstance instance)
+{
+	VmaVulkanFunctions vma_vk_funcs {
+		.vkGetInstanceProcAddr = vkGetInstanceProcAddr,
+		.vkGetDeviceProcAddr = vkGetDeviceProcAddr};
+
+	VmaAllocatorCreateInfo vma_alloc_info {
+		.flags = VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT,
+		.physicalDevice = physdev,
+		.device = vkdev,
+		.pVulkanFunctions = &vma_vk_funcs,
+		.instance = instance};
+
+	VmaAllocator allocator {};
+	VkResult rv {vmaCreateAllocator(&vma_alloc_info, &allocator)};
+
+	if (rv != VK_SUCCESS)
+	{
+		throw std::runtime_error("Couldn't create VMA allocator");
+	}
+
+	return allocator;
 }

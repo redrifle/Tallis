@@ -14,27 +14,18 @@ lt::context libtallis::init(lt::window& window)
 {
 	lt::context context {};
 	context.instance = lt::create_instance();
-	context.dev.physdev = context.dev.create_physical_device(context.instance);
-	context.dev.vkdev = lt::create_device(context.instance, context.dev);
-	context.dev.allocator = lt::vma_init(context.instance,
-										 context.dev.physdev,
-										 context.dev.vkdev);
-	window.surface = lt::create_surface(context.instance,
-										context.dev.vkdev,
-										window.win);
-	context.swapchain = lt::create_swapchain(context.dev.physdev,
-											 context.dev.vkdev,
-											 window.surface);
-	context.swapchain.depth_image = lt::create_depth_image(context.dev,
-														   context.swapchain);
+	std::vector<VkPhysicalDevice> devices {get_device_list(context.instance)};
+	const unsigned int device_index {get_best_device_index(devices)};
+	context.dev = lt::device(context.instance, devices[device_index]);
+	window.create_surface(context.instance);
+	context.swapchain.create_swapchain(context.dev, window.surface);
 
-	std::print("VkDevice: {}\nQueue family index: {}\nQueue: {}\n",
+	std::print("VkDevice : {}\nQueue family index : {}\nQueue : {}\nswapchain "
+			   "image count : {}\n",
 			   (void*)context.dev.vkdev,
 			   context.dev.q_family_index,
-			   (void*)context.dev.queue);
-	std::print("swapchain image count: {}\n", context.swapchain.images.size());
-	std::print("Depth image: {}\n",
-			   (void*)context.swapchain.depth_image.vkimage);
+			   (void*)context.dev.queue,
+			   context.swapchain.images.size());
 
 	return context;
 }
