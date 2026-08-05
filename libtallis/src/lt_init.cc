@@ -12,7 +12,7 @@ namespace lt = libtallis;
 
 lt::context libtallis::init(lt::window& window)
 {
-	lt::context context {};
+	lt::context context;
 	context.instance = lt::create_instance();
 	std::vector<VkPhysicalDevice> devices {get_device_list(context.instance)};
 	const unsigned int device_index {get_best_device_index(devices)};

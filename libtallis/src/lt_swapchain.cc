@@ -114,9 +114,7 @@ void lt::swapchain::create_swapchain(lt::device& dev, VkSurfaceKHR surface)
 	{
 		throw std::runtime_error("Couldn't get swapchain image count");
 	}
-
-	std::print("IMAGE COUNT: {}\n", image_count);
-
+	
 	images.resize(image_count);
 	rv = vkGetSwapchainImagesKHR(dev.vkdev,
 								 vkswapchain,
