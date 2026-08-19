@@ -8,6 +8,11 @@ namespace lt = libtallis;
 
 void libtallis::cleanup(lt::context& c, lt::window& win)
 {
+	if (c.swapchain.depth_image.view)
+	{
+		vkDestroyImageView(c.dev.vkdev, c.swapchain.depth_image.view, nullptr);
+	}
+
 	if (c.swapchain.depth_image.vkimage)
 	{
 		vmaDestroyImage(c.dev.allocator,

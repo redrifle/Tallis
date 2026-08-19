@@ -7,12 +7,13 @@ namespace libtallis
 {
 	struct device_features
 	{
-		VkPhysicalDeviceFeatures vk_10_features;
-		VkPhysicalDeviceVulkan11Features vk_11_features;
-		VkPhysicalDeviceVulkan12Features vk_12_features;
-		VkPhysicalDeviceVulkan13Features vk_13_features;
-		VkPhysicalDeviceVulkan14Features vk_14_features;
-		VkPhysicalDevicePageableDeviceLocalMemoryFeaturesEXT mem_features;
+		VkPhysicalDeviceFeatures vk_10_features {};
+		VkPhysicalDeviceVulkan11Features vk_11_features {};
+		VkPhysicalDeviceVulkan12Features vk_12_features {};
+		VkPhysicalDeviceVulkan13Features vk_13_features {};
+		VkPhysicalDeviceVulkan14Features vk_14_features {};
+		VkPhysicalDevicePageableDeviceLocalMemoryFeaturesEXT dev_local_mem {};
+		VkPhysicalDeviceMemoryPriorityFeaturesEXT mem_priority {};
 		device_features();
 		void enable_features(device_features&);
 	};

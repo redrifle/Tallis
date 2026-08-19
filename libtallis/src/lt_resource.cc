@@ -7,12 +7,14 @@
 namespace lt = libtallis;
 
 lt::image libtallis::create_image(VkImageCreateInfo& image_info,
-								  VmaAllocator alloc)
+								  VmaAllocator alloc,
+								  float priority)
 {
-	lt::image image {};
+	lt::image image {.format = image_info.format};
 	VmaAllocationCreateInfo alloc_info {
-		VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT,
-		VMA_MEMORY_USAGE_AUTO};
+		.flags = VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT,
+		.usage = VMA_MEMORY_USAGE_AUTO,
+		.priority = priority};
 
 	VkResult rv {vmaCreateImage(alloc,
 								&image_info,
@@ -25,7 +27,7 @@ lt::image libtallis::create_image(VkImageCreateInfo& image_info,
 	{
 		throw std::runtime_error("Couldn't create image");
 	}
-	
+
 	return image;
 }
 

@@ -7,7 +7,6 @@ add_library(libtallis
     src/lt_input.cc
     src/lt_device.cc
     src/lt_cleanup.cc
-    src/lt_mem.cc
     src/lt_surface.cc
     src/lt_swapchain.cc
     src/vma_impl.cc

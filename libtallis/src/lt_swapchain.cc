@@ -114,7 +114,7 @@ void lt::swapchain::create_swapchain(lt::device& dev, VkSurfaceKHR surface)
 	{
 		throw std::runtime_error("Couldn't get swapchain image count");
 	}
-	
+
 	images.resize(image_count);
 	rv = vkGetSwapchainImagesKHR(dev.vkdev,
 								 vkswapchain,
@@ -127,6 +127,27 @@ void lt::swapchain::create_swapchain(lt::device& dev, VkSurfaceKHR surface)
 	}
 
 	depth_image = create_depth_image(dev);
+
+	VkImageViewCreateInfo depth_view_info {
+		.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+		.image = depth_image.vkimage,
+		.viewType = VK_IMAGE_VIEW_TYPE_2D,
+		.format = depth_image.format,
+		.subresourceRange {.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT,
+						   .levelCount = 1,
+						   .layerCount = 1}};
+
+	depth_image.create_view(dev.vkdev, depth_view_info);
+}
+
+void lt::image::create_view(VkDevice dev, VkImageViewCreateInfo& create_info)
+{
+	VkResult rv {vkCreateImageView(dev, &create_info, nullptr, &view)};
+
+	if (rv != VK_SUCCESS)
+	{
+		throw std::runtime_error("Couldn't create image view");
+	}
 }
 
 lt::image lt::swapchain::create_depth_image(lt::device& dev)
@@ -164,7 +185,6 @@ lt::image lt::swapchain::create_depth_image(lt::device& dev)
 		.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
 		.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED};
 
-	lt::image depth_image {lt::create_image(image_info, dev.allocator)};
-
+	lt::image depth_image {lt::create_image(image_info, dev.allocator, 1.0f)};
 	return depth_image;
 }

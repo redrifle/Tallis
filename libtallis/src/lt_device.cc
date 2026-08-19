@@ -96,27 +96,24 @@ VkDevice lt::device::create_logical_device(VkInstance instance)
 		VK_EXT_PAGEABLE_DEVICE_LOCAL_MEMORY_EXTENSION_NAME,
 		VK_EXT_MEMORY_PRIORITY_EXTENSION_NAME};
 
+	/* We do not want to indiscriminately enable every feature on the device,
+	for performance reasons. Therefore, we get the supported features first
+	using a local struct, then set the features we want explicitly in our
+	actual device struct */
 	lt::device_features supported_features {};
-	supported_features.mem_features.sType =
-		VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PAGEABLE_DEVICE_LOCAL_MEMORY_FEATURES_EXT;
-	supported_features.vk_12_features.sType =
-		VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
-	supported_features.vk_13_features.sType =
-		VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES;
-	supported_features.vk_13_features.pNext = &supported_features
-												   .vk_12_features;
-
-	VkPhysicalDeviceFeatures2 device_features {
+	VkPhysicalDeviceFeatures2 supported_features_2 {
 		.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2,
-		.pNext = &supported_features.vk_13_features,
+		.pNext = &supported_features.vk_14_features,
 		.features = supported_features.vk_10_features};
 
-	vkGetPhysicalDeviceFeatures2(physdev, &device_features);
+	vkGetPhysicalDeviceFeatures2(physdev, &supported_features_2);
 	features.enable_features(supported_features);
+	supported_features_2.pNext = &features.vk_14_features;
+	supported_features_2.features = features.vk_10_features;
 
 	VkDeviceCreateInfo device_info {
 		.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
-		.pNext = &device_features,
+		.pNext = &supported_features_2,
 		.queueCreateInfoCount = 1,
 		.pQueueCreateInfos = &queue_info,
 		.enabledExtensionCount = static_cast<uint32_t>(dev_extensions.size()),
@@ -141,47 +138,45 @@ libtallis::device_features::device_features() :
 	vk_12_features({}),
 	vk_13_features({}),
 	vk_14_features({}),
-	mem_features({})
+	dev_local_mem({})
 {
-	mem_features.sType =
+	dev_local_mem.sType =
 		VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PAGEABLE_DEVICE_LOCAL_MEMORY_FEATURES_EXT;
+	mem_priority.sType =
+		VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MEMORY_PRIORITY_FEATURES_EXT;
 	vk_12_features.sType =
 		VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
 	vk_13_features.sType =
 		VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES;
-	vk_12_features.pNext = &mem_features;
+	vk_14_features.sType =
+		VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_4_FEATURES;
+	dev_local_mem.pNext = &mem_priority;
+	vk_12_features.pNext = &dev_local_mem;
 	vk_13_features.pNext = &vk_12_features;
+	vk_14_features.pNext = &vk_13_features;
 }
 
 void libtallis::device_features::enable_features(
 	lt::device_features& supported_features)
 {
-	mem_features.pageableDeviceLocalMemory = supported_features.mem_features
-												 .pageableDeviceLocalMemory;
-
+	dev_local_mem.pageableDeviceLocalMemory = supported_features.dev_local_mem
+												  .pageableDeviceLocalMemory;
 	vk_10_features.samplerAnisotropy = supported_features.vk_10_features
 										   .samplerAnisotropy;
-
 	vk_12_features.descriptorIndexing = supported_features.vk_12_features
 											.descriptorIndexing;
-
 	vk_12_features.shaderSampledImageArrayNonUniformIndexing =
 		supported_features.vk_12_features
 			.shaderSampledImageArrayNonUniformIndexing;
-
 	vk_12_features.descriptorBindingVariableDescriptorCount =
 		supported_features.vk_12_features
 			.descriptorBindingVariableDescriptorCount;
-
 	vk_12_features.runtimeDescriptorArray = supported_features.vk_12_features
 												.runtimeDescriptorArray;
-
 	vk_12_features.bufferDeviceAddress = supported_features.vk_12_features
 											 .bufferDeviceAddress;
-
 	vk_13_features.synchronization2 = supported_features.vk_13_features
 										  .synchronization2;
-
 	vk_13_features.dynamicRendering = supported_features.vk_13_features
 										  .dynamicRendering;
 }
@@ -250,7 +245,8 @@ VmaAllocator lt::device::create_allocator(VkInstance instance)
 		.vkGetDeviceProcAddr = vkGetDeviceProcAddr};
 
 	VmaAllocatorCreateInfo vma_alloc_info {
-		.flags = VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT,
+		.flags = VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT |
+				 VMA_ALLOCATOR_CREATE_EXT_MEMORY_PRIORITY_BIT,
 		.physicalDevice = physdev,
 		.device = vkdev,
 		.pVulkanFunctions = &vma_vk_funcs,

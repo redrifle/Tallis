@@ -4,7 +4,6 @@
 #include <libtallis/lt_device.hpp>
 #include <libtallis/lt_engine.hpp>
 #include <libtallis/lt_instance.hpp>
-#include <libtallis/lt_mem.hpp>
 #include <libtallis/lt_surface.hpp>
 #include <libtallis/lt_swapchain.hpp>
 
