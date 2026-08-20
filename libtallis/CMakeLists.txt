@@ -10,7 +10,15 @@ add_library(libtallis
     src/lt_surface.cc
     src/lt_swapchain.cc
     src/vma_impl.cc
-    src/lt_resource.cc)
+    src/lt_resource.cc
+    src/lt_model.cc)
+
+set(GENERATED_HEADER_DIR ${CMAKE_CURRENT_BINARY_DIR}/generated_header)
+configure_file(config.h.in ${GENERATED_HEADER_DIR}/config.h @ONLY)
+target_include_directories(libtallis PRIVATE 
+    "$<BUILD_INTERFACE:${GENERATED_HEADER_DIR}>"
+    "$<INSTALL_INTERFACE:include>"
+)
 
 target_include_directories(libtallis
     PUBLIC
@@ -38,5 +46,20 @@ FetchContent_MakeAvailable(vma)
 set(VMA_BUILD_SAMPLES OFF CACHE INTERNAL "")
 set(VMA_BUILD_DOCUMENTATION OFF CACHE INTERNAL "")
 target_link_libraries(libtallis PUBLIC GPUOpen::VulkanMemoryAllocator)
+
+FetchContent_Declare(
+    glm
+    SOURCE_DIR "${CMAKE_CURRENT_BINARY_DIR}/external/glm"
+    GIT_REPOSITORY "https://github.com/g-truc/glm")
+FetchContent_MakeAvailable(glm)
+target_link_libraries(libtallis PUBLIC glm)
+
+FetchContent_Declare(
+    tinyobjloader
+    SOURCE_DIR "${CMAKE_CURRENT_BINARY_DIR}/external/tinyobjloader"
+    GIT_TAG "release"
+    GIT_REPOSITORY "https://github.com/tinyobjloader/tinyobjloader")
+FetchContent_MakeAvailable(tinyobjloader)
+target_link_libraries(libtallis PUBLIC tinyobjloader)
 
 target_include_directories(libtallis PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/external)

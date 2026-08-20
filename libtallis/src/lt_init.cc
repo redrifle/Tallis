@@ -6,6 +6,7 @@
 #include <libtallis/lt_instance.hpp>
 #include <libtallis/lt_surface.hpp>
 #include <libtallis/lt_swapchain.hpp>
+#include <config.h>
 
 namespace lt = libtallis;
 
@@ -18,6 +19,7 @@ lt::context libtallis::init(lt::window& window)
 	context.dev = lt::device(context.instance, devices[device_index]);
 	window.create_surface(context.instance);
 	context.swapchain.create_swapchain(context.dev, window.surface);
+	context.load_models(ASSET_PATH);
 
 	std::print("VkDevice : {}\nQueue family index : {}\nQueue : {}\nswapchain "
 			   "image count : {}\n",

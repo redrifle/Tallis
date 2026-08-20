@@ -1,0 +1,3 @@
+#define SHADER_PATH "@CMAKE_BINARY_DIR@/libtallis/shaders/"
+#define TEXTURE_PATH "@CMAKE_SOURCE_DIR@/libtallis/textures/"
+#define ASSET_PATH "@CMAKE_SOURCE_DIR@/libtallis/assets/"

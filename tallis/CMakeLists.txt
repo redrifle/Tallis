@@ -1,7 +1,7 @@
 add_executable(tallis src/tallis.cc src/version.cc src/args.cc)
 target_link_libraries(tallis PRIVATE libtallis)
 set(GENERATED_HEADER_DIR ${CMAKE_CURRENT_BINARY_DIR}/generated_header)
-configure_file(config.h.in ${GENERATED_HEADER_DIR}/config.h)
+configure_file(config.h.in ${GENERATED_HEADER_DIR}/config.h @ONLY)
 target_include_directories(tallis PRIVATE 
     "$<BUILD_INTERFACE:${GENERATED_HEADER_DIR}>"
     "$<INSTALL_INTERFACE:include>"
