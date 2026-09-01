@@ -25,7 +25,7 @@ libtallis::device::device() :
 {
 }
 
-libtallis::device::device(VkInstance instance, VkPhysicalDevice dev) : device()
+void lt::device::create(VkInstance instance, VkPhysicalDevice dev)
 {
 	physdev = dev;
 	props.sType = {VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2};

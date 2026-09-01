@@ -10,13 +10,13 @@
 
 namespace lt = libtallis;
 
-lt::context libtallis::init(lt::window& window)
+auto lt::init(lt::window& window) -> context
 {
 	lt::context context;
 	context.instance = lt::create_instance();
 	std::vector<VkPhysicalDevice> devices {get_device_list(context.instance)};
 	const unsigned int device_index {get_best_device_index(devices)};
-	context.dev = lt::device(context.instance, devices[device_index]);
+	context.dev.create(context.instance, devices[device_index]);
 	window.create_surface(context.instance);
 	context.swapchain.create_swapchain(context.dev, window.surface);
 	context.load_models(ASSET_PATH);

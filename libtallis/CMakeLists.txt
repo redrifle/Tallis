@@ -11,7 +11,8 @@ add_library(libtallis
     src/lt_swapchain.cc
     src/vma_impl.cc
     src/lt_resource.cc
-    src/lt_model.cc)
+    src/lt_model.cc
+    src/lt_util.cc)
 
 set(GENERATED_HEADER_DIR ${CMAKE_CURRENT_BINARY_DIR}/generated_header)
 configure_file(config.h.in ${GENERATED_HEADER_DIR}/config.h @ONLY)

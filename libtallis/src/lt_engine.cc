@@ -1,4 +1,6 @@
 #include <string>
+#include <string_view>
+#include <ranges>
 #include <print>
 #include <stdexcept>
 #include <filesystem>
@@ -6,9 +8,12 @@
 #include <libtallis/lt_engine.hpp>
 #include <libtallis/lt_init.hpp>
 #include <libtallis/lt_window.hpp>
+#include <libtallis/lt_util.hpp>
 #include <libtallis/lt_cleanup.hpp>
 
 namespace fs = std::filesystem;
+namespace vs = std::views;
+namespace rg = std::ranges;
 namespace lt = libtallis;
 
 void libtallis::run(lt::window& win)
@@ -23,33 +28,20 @@ void libtallis::run(lt::window& win)
 	lt::cleanup(context, win);
 }
 
-void libtallis::context::load_models(std::string const dir)
+void libtallis::context::load_models(std::string_view const dir)
 {
-	auto current_dir {fs::recursive_directory_iterator(dir)};
-
-	std::vector<std::string> paths;
-	for (const auto& file : current_dir)
-	{
-		if (!file.is_directory())
-		{
-			static int model_index {0};
-			std::string extension {file.path().extension().string()};
-			if (extension == ".obj")
-			{
-				paths.emplace_back(file.path().string());
-			}
-		}
-	}
+	auto const dirs = rg::subrange(fs::recursive_directory_iterator(dir));
+	auto const paths {dirs | vs::filter(is_obj) | vs::transform(path_str) |
+					  rg::to<std::vector>()};
 
 	if (paths.empty())
 	{
 		throw std::runtime_error("No models found");
 	}
 
-	model_list.resize(paths.size());
-	for (auto i {0}; i < paths.size(); ++i)
+	model_list.reserve(model_list.capacity() + paths.size());
+	for (auto const& path : paths)
 	{
-		std::println("{}", paths[i]);
-		model_list[i].load(paths[i]);
+		model_list.emplace_back().load_obj(path);
 	}
 }

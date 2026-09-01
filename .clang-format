@@ -17,4 +17,6 @@ PackConstructorInitializers: CurrentLine
 PenaltyBreakAssignment: 150
 #PenaltyBreakOpenParenthesis: 100
 SpaceBeforeCpp11BracedList: True
+BreakBeforeBinaryOperators: None
+Cpp11BracedListStyle: True
 ...

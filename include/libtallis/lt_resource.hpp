@@ -10,9 +10,14 @@ namespace libtallis
 		VmaAllocation memory;
 		VkFormat format;
 		VkImageView view;
-		void create_view(VkDevice, VkImageViewCreateInfo&);
+		image();
+		image(VkImageCreateInfo const&, VmaAllocator const, float const);
+		void create_view(VkDevice const, VkImageViewCreateInfo const&);
 	};
-	libtallis::image create_image(VkImageCreateInfo&, VmaAllocator, float);
-	VkBuffer create_buffer();
+	struct buffer
+	{
+		buffer();
+		buffer(VkBufferCreateInfo const&);
+	};
 }; /* namespace libtallis */
 #endif /* LT_RESOURCE_HPP_019f53b9_2c0d_7486_881c_a04fbc6bfd6c */

@@ -13,13 +13,11 @@ namespace libtallis
 		VkSwapchainKHR vkswapchain;
 		VkExtent2D extent;
 		std::vector<VkImage> images;
-		void create_swapchain(libtallis::device&, VkSurfaceKHR);
-		libtallis::image depth_image;
+		void create_swapchain(device&, VkSurfaceKHR);
+		image depth_image;
 
 	  private:
-		libtallis::image create_depth_image(libtallis::device&);
+		auto create_depth_image(device&) -> image;
 	};
-	libtallis::image create_depth_image(libtallis::device&,
-										libtallis::swapchain&);
 } /* namespace libtallis */
 #endif /* LT_SWAPCHAIN_HPP_019e824d_d0d3_7e7c_9a95_f95c1831a8ae */

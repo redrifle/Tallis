@@ -33,6 +33,7 @@ namespace libtallis
 		VkDevice create_logical_device(VkInstance);
 		uint32_t select_queue_family(VkInstance);
 		VmaAllocator create_allocator(VkInstance);
+		void create(VkInstance, VkPhysicalDevice);
 	};
 	std::vector<VkPhysicalDevice> get_device_list(VkInstance);
 	unsigned int get_best_device_index(std::vector<VkPhysicalDevice>&);

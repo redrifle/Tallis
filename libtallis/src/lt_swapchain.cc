@@ -140,17 +140,7 @@ void lt::swapchain::create_swapchain(lt::device& dev, VkSurfaceKHR surface)
 	depth_image.create_view(dev.vkdev, depth_view_info);
 }
 
-void lt::image::create_view(VkDevice dev, VkImageViewCreateInfo& create_info)
-{
-	VkResult rv {vkCreateImageView(dev, &create_info, nullptr, &view)};
-
-	if (rv != VK_SUCCESS)
-	{
-		throw std::runtime_error("Couldn't create image view");
-	}
-}
-
-lt::image lt::swapchain::create_depth_image(lt::device& dev)
+auto lt::swapchain::create_depth_image(lt::device& dev) -> image
 {
 	VkFormat depth_format {VK_FORMAT_UNDEFINED};
 	std::array depth_formats {VK_FORMAT_D24_UNORM_S8_UINT,
@@ -185,6 +175,6 @@ lt::image lt::swapchain::create_depth_image(lt::device& dev)
 		.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
 		.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED};
 
-	lt::image depth_image {lt::create_image(image_info, dev.allocator, 1.0f)};
+	lt::image depth_image(image_info, dev.allocator, 1.0f);
 	return depth_image;
 }

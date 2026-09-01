@@ -6,11 +6,19 @@
 
 namespace lt = libtallis;
 
-lt::image libtallis::create_image(VkImageCreateInfo& image_info,
-								  VmaAllocator alloc,
-								  float priority)
+libtallis::image::image() :
+	vkimage(nullptr),
+	memory(nullptr),
+	format(),
+	view(nullptr)
 {
-	lt::image image {.format = image_info.format};
+}
+
+libtallis::image::image(VkImageCreateInfo const& image_info,
+						VmaAllocator const alloc,
+						float const priority)
+{
+	format = image_info.format;
 	VmaAllocationCreateInfo alloc_info {
 		.flags = VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT,
 		.usage = VMA_MEMORY_USAGE_AUTO,
@@ -19,19 +27,31 @@ lt::image libtallis::create_image(VkImageCreateInfo& image_info,
 	VkResult rv {vmaCreateImage(alloc,
 								&image_info,
 								&alloc_info,
-								&image.vkimage,
-								&image.memory,
+								&vkimage,
+								&memory,
 								nullptr)};
 
 	if (rv != VK_SUCCESS)
 	{
 		throw std::runtime_error("Couldn't create image");
 	}
-
-	return image;
 }
 
-VkBuffer libtallis::create_buffer()
+void lt::image::create_view(VkDevice const dev,
+							VkImageViewCreateInfo const& create_info)
 {
-	return nullptr;
+	VkResult rv {vkCreateImageView(dev, &create_info, nullptr, &view)};
+
+	if (rv != VK_SUCCESS)
+	{
+		throw std::runtime_error("Couldn't create image view");
+	}
+}
+
+libtallis::buffer::buffer()
+{
+}
+
+libtallis::buffer::buffer(VkBufferCreateInfo const& buffer_info)
+{
 }
